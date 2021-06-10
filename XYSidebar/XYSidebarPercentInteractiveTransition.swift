@@ -152,7 +152,15 @@ class XYSidebarPercentInteractiveTransition: UIPercentDrivenInteractiveTransitio
     }
     
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        return  XYSidebar.navigationController?.children.count ?? 0 == 1
+        
+        if XYSidebar.navigationController?.children.count ?? 0 == 1 {
+            if gestureRecognizer.location(in: gestureRecognizer.view).x < 30 {
+                return true
+            }
+        }
+        
+        
+        return false
     }
     
     //返回true，则表示两个手势同时使用
