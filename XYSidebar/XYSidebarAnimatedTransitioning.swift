@@ -10,13 +10,13 @@ import UIKit
 class XYSidebarAnimatedTransitioning: NSObject, UIViewControllerAnimatedTransitioning {
     
     // 隐藏与否
-    var isHidden: Bool = false
+    var isPresent: Bool = true
     
     var config:XYSidebarConfig!
     
-    init(hiddeConfig: XYSidebarConfig, isHidden: Bool = false) {
-        self.config = hiddeConfig
-        self.isHidden = isHidden
+    init(_ config: XYSidebarConfig, isPresent: Bool = true) {
+        self.config = config
+        self.isPresent = isPresent
     }
     
     // 执行的动画时长
@@ -25,24 +25,38 @@ class XYSidebarAnimatedTransitioning: NSObject, UIViewControllerAnimatedTransiti
     }
     
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-        if isHidden {
-            animateTransitionHiddenType(transitionContext: transitionContext)
+        if isPresent {
+            presentTransitionAnimation(transitionContext: transitionContext)
         } else {
-            animateTransitionShowType(transitionContext: transitionContext)
+            dismissTransitionAnimation(transitionContext: transitionContext)
         }
     }
     
     // show
-    func animateTransitionShowType(transitionContext: UIViewControllerContextTransitioning) {
+    func presentTransitionAnimation(transitionContext: UIViewControllerContextTransitioning) {
         let fromController: UIViewController = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.from)!
         let toController: UIViewController = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to)!
         let containerView = transitionContext.containerView
-        let width:CGFloat = XYSidebarConfig.screenWidth * config.sideRelative
-        let x:CGFloat! = config.direction == .left ? 0.0 : (XYSidebarConfig.screenWidth - width)
-        toController.view.frame = CGRect.init(x: x, y: 0, width: width, height: containerView.frame.height)
+        
+        var x: CGFloat = 0.0
+        var y: CGFloat = 0.0
+        var width: CGFloat = containerView.frame.width
+        var height: CGFloat = containerView.frame.height
+
+        switch config.direction {
+        case .left:
+            width *= config.sideRelative
+        case .right:
+            x = width * (1-config.sideRelative)
+            width *= config.sideRelative
+        case .bottom:
+            y = height * (1-config.sideRelative)
+            height *= config.sideRelative
+        }
+        
+        toController.view.frame = CGRect.init(x: x, y: y, width: width, height: height)
         toController.view.clipsToBounds = true
-        // fromController UINavigationController
-        // toController SnapKitViewController
+
         containerView.addSubview(toController.view)
         containerView.addSubview(fromController.view)
         
@@ -58,25 +72,26 @@ class XYSidebarAnimatedTransitioning: NSObject, UIViewControllerAnimatedTransiti
         mask?.alpha = 0.0
         mask?.isUserInteractionEnabled = false
         
-        let flag: CGFloat! = config.direction == .left ? -1.0 : 1.0
+        let flagX: CGFloat = config.direction == .left ? -1.0 : config.direction == .right ? 1.0 : 0.0
+        let flagY: CGFloat = config.direction == .bottom ? 1.0 : 0.0
         
-        var fromTransform: CGAffineTransform = CGAffineTransform(translationX: -flag * width, y: 0)
-        let toTransform: CGAffineTransform = CGAffineTransform(translationX: flag * width, y: 0)
-        
+        var fromTransform: CGAffineTransform = CGAffineTransform(translationX: -flagX * width, y: -flagY * height)
         if self.config.animation == .translationMask {
             fromTransform = CGAffineTransform(translationX: 0, y: 0)
             containerView.bringSubviewToFront(toController.view)
-        }else if self.config.animation == .zoom {
-            let t1: CGAffineTransform = CGAffineTransform(translationX: -flag * width * config.zoomOffsetRelative, y: 0)
-            let t2: CGAffineTransform = CGAffineTransform(scaleX: config.zoomRelative, y: config.zoomRelative)
-            fromTransform = t1.concatenating(t2)
+        } else if self.config.animation == .zoom {
+            let transform1: CGAffineTransform = CGAffineTransform(translationX: -flagX * width * config.zoomOffsetRelative, y: -flagX * height * config.zoomOffsetRelative)
+            let transform2: CGAffineTransform = CGAffineTransform(scaleX: config.zoomRelative, y: config.zoomRelative)
+            fromTransform = transform1.concatenating(transform2)
         }
+        
+        let toTransform: CGAffineTransform = CGAffineTransform(translationX: flagX * width, y: flagY * height)
         if self.config.animation != .zoom {
             toController.view.transform = toTransform
-            toController.view.frame = CGRect(x: toTransform.tx+x, y: 0, width: width, height: containerView.frame.height)
-        }else {
+            toController.view.frame = CGRect(x: toTransform.tx+x, y: toTransform.ty+y, width: width, height: height)
+        } else {
             toController.view.transform = CGAffineTransform(translationX: 0, y: 0)
-            toController.view.frame = CGRect(x: 0, y: 0, width: width, height: containerView.frame.height)
+            toController.view.frame = CGRect(x: 0, y: 0, width: width, height: height)
         }
         
         UIView.animate(withDuration: self.transitionDuration(using: transitionContext), animations: {
@@ -102,15 +117,28 @@ class XYSidebarAnimatedTransitioning: NSObject, UIViewControllerAnimatedTransiti
     
 
     // hidde
-    func animateTransitionHiddenType(transitionContext: UIViewControllerContextTransitioning) {
+    func dismissTransitionAnimation(transitionContext: UIViewControllerContextTransitioning) {
         let fromController:UIViewController = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.from)!
         let toController:UIViewController = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to)!
-        
         let containerView = transitionContext.containerView
-        let width:CGFloat = XYSidebarConfig.screenWidth * self.config.sideRelative
-        let x:CGFloat! = config.direction == .left ? 0.0 : (XYSidebarConfig.screenWidth - width)
         
-        fromController.view.frame = CGRect.init(x: x, y: 0, width: width, height: containerView.frame.height)
+        var x: CGFloat = 0.0
+        var y: CGFloat = 0.0
+        var width: CGFloat = containerView.frame.width
+        var height: CGFloat = containerView.frame.height
+
+        switch config.direction {
+        case .left:
+            width *= config.sideRelative
+        case .right:
+            x = width * (1-config.sideRelative)
+            width *= config.sideRelative
+        case .bottom:
+            y = height * (1-config.sideRelative)
+            height *= config.sideRelative
+        }
+        
+        fromController.view.frame = CGRect.init(x: x, y: y, width: width, height: height)
     
         var mask: XYSidebarMaskView?
         for view in toController.view.subviews {
@@ -119,14 +147,13 @@ class XYSidebarAnimatedTransitioning: NSObject, UIViewControllerAnimatedTransiti
                 break
             }
         }
+        let flagX: CGFloat = config.direction == .left ? -1.0 : config.direction == .right ? 1.0 : 0.0
+        let flagY: CGFloat = config.direction == .bottom ? 1.0 : 0.0
         
-        let flag: CGFloat! = config.direction == .left ? -1.0 : 1.0
-        var fromTransform:CGAffineTransform = CGAffineTransform.init(translationX: flag * width, y: 0)
+        var fromTransform: CGAffineTransform = CGAffineTransform(translationX: flagX * width, y: flagY * height)
         
-        if self.config.animation == .translationMask {
-            fromTransform = CGAffineTransform.init(translationX: flag * width, y: 0)
-        }else if self.config.animation == .zoom {
-            fromTransform = CGAffineTransform.init(translationX: 0, y: 0)
+        if config.animation == .zoom {
+            fromTransform = CGAffineTransform(translationX: 0, y: 0)
             containerView.bringSubviewToFront(toController.view)
         }
         

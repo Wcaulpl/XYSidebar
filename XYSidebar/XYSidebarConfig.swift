@@ -13,17 +13,17 @@ let XYSidebarPanNotification = "sidebarPanNotification"
 
 public enum XYSidebarAnimation:Int {
     case zoom //缩放
-    case translationPush //横向平移
-    case translationMask //盖在最上面横向平移
+    case translationPush //平移
+    case translationMask //盖在最上面平移
 }
 
 public enum XYSidebarDirection:Int {
     case left  // 从左边出来
     case right // 从右边出来
+    case bottom // 从右边出来
 }
 
 public class XYSidebarConfig {
-    static let screenWidth = UIScreen.main.bounds.width
 
     /// 执行动画的时长 默认0.3
     public var timeInterval: TimeInterval = 0.3

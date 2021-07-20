@@ -108,13 +108,20 @@ class XYSidebarPercentInteractiveTransition: UIPercentDrivenInteractiveTransitio
     
     @objc func handlePan(pan: UIPanGestureRecognizer)  {
         var x:CGFloat = pan.translation(in: pan.view).x // -左划 +右滑
+        if config.direction == .bottom {
+            x = pan.translation(in: pan.view).y // -上划 +下滑
+        }
         if config == nil && !isHidden {
             handlePresentPan(pan: pan)
             return
         }
         var width:CGFloat = (pan.view!.bounds.width) // 手势驱动时 相对移动的宽度
+        if config.direction == .bottom {
+            x = pan.view!.bounds.height
+        }
+
         if config.animation == .zoom {
-            width = XYSidebarConfig.screenWidth * (1.0 - config.zoomOffsetRelative)
+            width = width * (1.0 - config.zoomOffsetRelative)
         }
         var percent:CGFloat = 0.0
         switch pan.state {
@@ -152,14 +159,11 @@ class XYSidebarPercentInteractiveTransition: UIPercentDrivenInteractiveTransitio
     }
     
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        
         if XYSidebar.navigationController?.children.count ?? 0 == 1 {
             if gestureRecognizer.location(in: gestureRecognizer.view).x < 30 {
                 return true
             }
         }
-        
-        
         return false
     }
     
@@ -174,12 +178,6 @@ class XYSidebarPercentInteractiveTransition: UIPercentDrivenInteractiveTransitio
                 }
             }
         }
-        
-        
-        
-//        if XYSidebar.navigationController?.children.count ?? 0 == 1 && otherGestureRecognizer != XYSidebar.navigationController?.interactivePopGestureRecognizer && !(otherGestureRecognizer.view is XYSidebarMaskView) {
-//            return true
-//        }
         return false
     }
     

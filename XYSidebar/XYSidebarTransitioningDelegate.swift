@@ -18,11 +18,11 @@ class XYSidebarTransitioningDelegate: NSObject,UIViewControllerTransitioningDele
     }
     
     func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        return XYSidebarAnimatedTransitioning(hiddeConfig: config)
+        return XYSidebarAnimatedTransitioning(config)
     }
     
     func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        return XYSidebarAnimatedTransitioning(hiddeConfig: config, isHidden: true)
+        return XYSidebarAnimatedTransitioning(config, isPresent: false)
     }
     
     // present交互的百分比

@@ -12,7 +12,7 @@ class SideController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        view.backgroundColor = .white
         let btn = UIButton(type: .custom)
         btn.setTitle("next", for: .normal)
         view.addSubview(btn)
@@ -38,13 +38,79 @@ class ViewController: UIViewController {
 
     func showLeftSide() {
         let vc = SideController()
-        xy_showSidebar({
+        xy_showSidebar({ [unowned self] in
             $0.sideRelative = 0.84
+            $0.direction = direction
+            $0.animation = animation
+
         }, vc)
     }
 
     @IBAction func next() {
         showLeftSide()
+    }
+    
+    var direction: XYSidebarDirection = .left
+    var animation: XYSidebarAnimation = .translationPush
+    
+    @IBAction func left(_ btn: UIButton) {
+        for tag in 10...12 {
+            if let temp = view.viewWithTag(tag) as? UIButton {
+                temp.isSelected = false
+            }
+        }
+        btn.isSelected = true
+        direction = .left
+    }
+    
+    @IBAction func right(_ btn: UIButton) {
+        for tag in 10...12 {
+            if let temp = view.viewWithTag(tag) as? UIButton {
+                temp.isSelected = false
+            }
+        }
+        btn.isSelected = true
+        direction = .right
+    }
+    
+    @IBAction func bottom(_ btn: UIButton) {
+        for tag in 10...12 {
+            if let temp = view.viewWithTag(tag) as? UIButton {
+                temp.isSelected = false
+            }
+        }
+        btn.isSelected = true
+        direction = .bottom
+    }
+    
+    @IBAction func zoom(_ btn: UIButton) {
+        for tag in 20...22 {
+            if let temp = view.viewWithTag(tag) as? UIButton {
+                temp.isSelected = false
+            }
+        }
+        btn.isSelected = true
+        animation = .zoom
+    }
+    
+    @IBAction func push(_ btn: UIButton) {
+        for tag in 20...22 {
+            if let temp = view.viewWithTag(tag) as? UIButton {
+                temp.isSelected = false
+            }
+        }
+        btn.isSelected = true
+        animation = .translationPush
+    }
+    
+    @IBAction func mask(_ btn: UIButton) {
+        for tag in 20...22 {
+            if let temp = view.viewWithTag(tag) as? UIButton {
+                temp.isSelected = false
+            }
+        }
+        btn.isSelected = true
+        animation = .translationMask
     }
 }
 
