@@ -62,8 +62,13 @@ class XYSidebarPercentInteractiveTransition: UIPercentDrivenInteractiveTransitio
     //手势blcok 回调
     func handlePresentPan(pan:UIPanGestureRecognizer) {
         var x:CGFloat = pan.translation(in: pan.view).x // -左划 +右滑
-        let width:CGFloat = (pan.view!.bounds.width)
+        var width:CGFloat = (pan.view!.bounds.width)
         var percent:CGFloat = 0.0
+        
+        if config.direction == .bottom {
+            x = pan.translation(in: pan.view).y // -上划 +下滑
+            width = pan.view!.bounds.height
+        }
         
         switch pan.state {
         case .began:
@@ -107,22 +112,23 @@ class XYSidebarPercentInteractiveTransition: UIPercentDrivenInteractiveTransitio
     }
     
     @objc func handlePan(pan: UIPanGestureRecognizer)  {
-        var x:CGFloat = pan.translation(in: pan.view).x // -左划 +右滑
-        if config.direction == .bottom {
-            x = pan.translation(in: pan.view).y // -上划 +下滑
-        }
         if config == nil && !isHidden {
             handlePresentPan(pan: pan)
             return
         }
+        
+        var x:CGFloat = pan.translation(in: pan.view).x // -左划 +右滑
         var width:CGFloat = (pan.view!.bounds.width) // 手势驱动时 相对移动的宽度
-        if config.direction == .bottom {
-            x = pan.view!.bounds.height
-        }
 
+        if config.direction == .bottom {
+            x = pan.translation(in: pan.view).y // -上划 +下滑
+            width = pan.view!.bounds.height
+        }
+        
         if config.animation == .zoom {
             width = width * (1.0 - config.zoomOffsetRelative)
         }
+        
         var percent:CGFloat = 0.0
         switch pan.state {
         case .began :

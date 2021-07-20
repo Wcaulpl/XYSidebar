@@ -80,7 +80,7 @@ class XYSidebarAnimatedTransitioning: NSObject, UIViewControllerAnimatedTransiti
             fromTransform = CGAffineTransform(translationX: 0, y: 0)
             containerView.bringSubviewToFront(toController.view)
         } else if self.config.animation == .zoom {
-            let transform1: CGAffineTransform = CGAffineTransform(translationX: -flagX * width * config.zoomOffsetRelative, y: -flagX * height * config.zoomOffsetRelative)
+            let transform1: CGAffineTransform = CGAffineTransform(translationX: -flagX * width * config.zoomOffsetRelative, y: -flagY * height * config.zoomOffsetRelative)
             let transform2: CGAffineTransform = CGAffineTransform(scaleX: config.zoomRelative, y: config.zoomRelative)
             fromTransform = transform1.concatenating(transform2)
         }
