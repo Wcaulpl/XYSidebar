@@ -16,7 +16,7 @@ Pod::Spec.new do |spec|
   #
 
   spec.name         = "XYSidebar"
-  spec.version      = "0.0.2"
+  spec.version      = "0.1.0"
   spec.summary      = "一个仿QQ侧栏的解决方案"
 
   # This description is used to generate tags and improve search results.
@@ -24,7 +24,7 @@ Pod::Spec.new do |spec|
   #   * Try to keep it short, snappy and to the point.
   #   * Write the description between the DESC delimiters below.
   #   * Finally, don't worry about the indent, CocoaPods strips it!
-  spec.description  = '仿QQ侧栏,包括手势推出、推入'
+  spec.description  = '仿QQ侧栏,包括手势推出、推入,从底部推出'
 
   spec.homepage     = "https://github.com/Wcaulpl/XYSidebar"
   # spec.screenshots  = "www.example.com/screenshots_1.gif", "www.example.com/screenshots_2.gif"
