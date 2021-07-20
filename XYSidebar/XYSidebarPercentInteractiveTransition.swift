@@ -16,41 +16,40 @@ class XYSidebarPercentInteractiveTransition: UIPercentDrivenInteractiveTransitio
     var isInteractive:Bool = false
     
     weak var targetVc: UIViewController!
-    var config: XYSidebarConfig!
-    var isHidden: Bool = false
+    private var config: XYSidebarConfig!
+//    private var isHidden: Bool = false
     private var direction: XYSidebarDirection = .left
     private var percent:CGFloat  = 0.0 //必须用全局的
     
-    static func show(viewController: UIViewController?, config:XYSidebarConfig?) -> XYSidebarPercentInteractiveTransition {
-        let transition = XYSidebarPercentInteractiveTransition()
-        transition.targetVc = viewController
-        transition.config = config
-        NotificationCenter.default.addObserver(transition, selector: #selector(xy_tapAction), name: NSNotification.Name(rawValue:XYSidebarTapNotification), object: nil)
-        NotificationCenter.default.addObserver(transition, selector: #selector(xy_panAction(_ :)), name: NSNotification.Name(rawValue:XYSidebarPanNotification), object: nil)
-        return transition
+    static func present() -> XYSidebarPercentInteractiveTransition {
+        return XYSidebarPercentInteractiveTransition(nil, config: nil)
     }
     
-    static func hidden(viewController: UIViewController?, config:XYSidebarConfig?) -> XYSidebarPercentInteractiveTransition {
-        let transition = XYSidebarPercentInteractiveTransition()
-        transition.targetVc = viewController
-        transition.config = config
-        transition.isHidden = true
-        NotificationCenter.default.addObserver(transition, selector: #selector(xy_tapAction), name: NSNotification.Name(rawValue:XYSidebarTapNotification), object: nil)
-        NotificationCenter.default.addObserver(transition , selector: #selector(xy_panAction(_ :)), name: NSNotification.Name(rawValue:XYSidebarPanNotification), object: nil)
-        return transition
+    static func dismss(_ viewController: UIViewController?, config:XYSidebarConfig?) -> XYSidebarPercentInteractiveTransition {
+        return XYSidebarPercentInteractiveTransition(viewController, config: config)
+    }
+    
+    init(_ viewController: UIViewController?, config:XYSidebarConfig?) {
+        super.init()
+        self.targetVc = viewController
+        self.config = config
+        NotificationCenter.default.addObserver(self, selector: #selector(xy_tapAction), name: NSNotification.Name(rawValue:XYSidebarTapNotification), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(xy_panAction(_ :)), name: NSNotification.Name(rawValue:XYSidebarPanNotification), object: nil)
     }
     
     @objc func xy_tapAction() {
-        if !isHidden {return}
-        targetVc?.dismiss(animated: true, completion: nil)
-        finish()
+        if let vc = targetVc {
+            vc.dismiss(animated: true, completion: nil)
+            finish()
+        }
     }
     
     @objc func xy_panAction(_ sender:Notification) {
-        let pan:UIPanGestureRecognizer = sender.object as! UIPanGestureRecognizer
-        if isHidden {
+        if let _ = config {
+            let pan:UIPanGestureRecognizer = sender.object as! UIPanGestureRecognizer
             handlePan(pan: pan)
         }
+        
     }
     
     func addPanGesture(fromViewController:UIViewController) {
@@ -62,20 +61,15 @@ class XYSidebarPercentInteractiveTransition: UIPercentDrivenInteractiveTransitio
     //手势blcok 回调
     func handlePresentPan(pan:UIPanGestureRecognizer) {
         var x:CGFloat = pan.translation(in: pan.view).x // -左划 +右滑
-        var width:CGFloat = (pan.view!.bounds.width)
+        let width:CGFloat = (pan.view!.bounds.width)
         var percent:CGFloat = 0.0
-        
-        if config.direction == .bottom {
-            x = pan.translation(in: pan.view).y // -上划 +下滑
-            width = pan.view!.bounds.height
-        }
         
         switch pan.state {
         case .began:
             if x < 0 {
-                direction = .right;
+                direction = .right
             } else if x >= 0 {
-                direction = .left;
+                direction = .left
             }
             isInteractive = true
             if let block = completeShowGesture {
@@ -112,7 +106,7 @@ class XYSidebarPercentInteractiveTransition: UIPercentDrivenInteractiveTransitio
     }
     
     @objc func handlePan(pan: UIPanGestureRecognizer)  {
-        if config == nil && !isHidden {
+        if config == nil {
             handlePresentPan(pan: pan)
             return
         }
@@ -136,7 +130,7 @@ class XYSidebarPercentInteractiveTransition: UIPercentDrivenInteractiveTransitio
             targetVc?.dismiss(animated: true, completion: nil)
             break;
         case .changed:
-            if config.direction == .left && isHidden {
+            if config.direction == .left {
                 x = x>0.0 ? 0.0:x
             }else {
                 x = x<0.0 ? 0.0:x
@@ -169,6 +163,15 @@ class XYSidebarPercentInteractiveTransition: UIPercentDrivenInteractiveTransitio
             if gestureRecognizer.location(in: gestureRecognizer.view).x < 30 {
                 return true
             }
+            
+            if gestureRecognizer.location(in: gestureRecognizer.view).x > gestureRecognizer.view!.frame.width - 30 {
+                return true
+            }
+            
+            if gestureRecognizer.location(in: gestureRecognizer.view).y > gestureRecognizer.view!.frame.height - 30 {
+                return true
+            }
+            
         }
         return false
     }

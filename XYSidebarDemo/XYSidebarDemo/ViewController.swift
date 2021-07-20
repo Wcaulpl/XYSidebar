@@ -30,7 +30,11 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         xy_registGestureSidebar { [weak self] direction in
-            if direction == .left {
+            if direction == .bottom {
+                self?.showLeftSide()
+            } else if direction == .left {
+                self?.showLeftSide()
+            } else if direction == .right {
                 self?.showLeftSide()
             }
         }
@@ -38,7 +42,7 @@ class ViewController: UIViewController {
 
     func showLeftSide() {
         let vc = SideController()
-        xy_showSidebar({ [unowned self] in
+        xy_present({ [unowned self] in
             $0.sideRelative = 0.84
             $0.direction = direction
             $0.animation = animation

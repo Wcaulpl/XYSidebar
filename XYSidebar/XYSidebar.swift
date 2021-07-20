@@ -47,7 +47,7 @@ extension UIViewController {
     /// - Parameters:
     ///   - configuration: 配置
     ///   - viewController: 将要展现的viewController
-    public func xy_showSidebar(_ configuration:(XYSidebarConfig)->(), _ viewController:UIViewController) {
+    public func xy_present(_ configuration:(XYSidebarConfig)->(), _ viewController:UIViewController) {
         
         let config = XYSidebarConfig()
         configuration(config)
@@ -59,7 +59,8 @@ extension UIViewController {
         } else {
             delegate!.config = config
         }
-        let dismissalInteractiveTransition = XYSidebarPercentInteractiveTransition.hidden(viewController:viewController, config: config)
+        // 添加手势返回
+        let dismissalInteractiveTransition = XYSidebarPercentInteractiveTransition.dismss(viewController, config: config)
         delegate!.dismissalInteractiveTransition = dismissalInteractiveTransition
         viewController.transitioningDelegate = delegate 
         viewController.modalPresentationStyle = .fullScreen
@@ -72,8 +73,8 @@ extension UIViewController {
     ///
     /// - Parameter completeShowGesture: 侧边栏展示的方向
     public func xy_registGestureSidebar(completeShowGesture:@escaping (XYSidebarDirection)->()) {
-        let  delegate = XYSidebarTransitioningDelegate(nil)
-        let presentationInteractiveTransition = XYSidebarPercentInteractiveTransition.show(viewController: nil, config: nil)
+        let delegate = XYSidebarTransitioningDelegate(nil)
+        let presentationInteractiveTransition = XYSidebarPercentInteractiveTransition.present()
         presentationInteractiveTransition.addPanGesture(fromViewController: self)
         presentationInteractiveTransition.completeShowGesture = completeShowGesture
         delegate.presentationInteractiveTransition = presentationInteractiveTransition
@@ -82,6 +83,9 @@ extension UIViewController {
         objc_setAssociatedObject(self, &showControlelrTransitioningDelegateKey, delegate, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
     
+    /// 侧边栏调用push
+    ///
+    /// - Parameter viewController
     public func xy_sidebarPushViewController(_ viewController: UIViewController) {
         let rootVc: UIViewController = XYSidebar.keyWindow.rootViewController!
         if rootVc is UITabBarController {
@@ -90,9 +94,7 @@ extension UIViewController {
         self.dismiss(animated: true, completion: nil)
         XYSidebar.navigationController?.pushViewController(viewController, animated: false)
     }
-    
-    
-    
+        
     /// 侧边栏调用present
     ///
     /// - Parameter viewController
